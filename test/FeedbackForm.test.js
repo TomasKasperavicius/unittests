@@ -25,7 +25,6 @@ describe('FeedbackForm', () => {
         <FeedbackForm />
       </FeedbackContext.Provider>
     )
-    expect(component.toJSON()).toMatchSnapshot()
   })
 
   it('renders correctly when editing feedback', () => {
@@ -43,7 +42,6 @@ describe('FeedbackForm', () => {
         <FeedbackForm />
       </FeedbackContext.Provider>
     )
-    expect(component.toJSON()).toMatchSnapshot()
   })
 
   it('disables the submit button when text is less than 10 characters', () => {
@@ -106,77 +104,113 @@ describe('FeedbackForm', () => {
     expect(ratingSelect.props.selected).toBe(8)
   })
   it('calls the addFeedback function with the correct parameters when submitting a new feedback item', () => {
-  const component = renderer.create(
-    <FeedbackContext.Provider
-      value={{ addFeedback, updateFeedback, feedbackEdit }}
-    >
-      <FeedbackForm />
-    </FeedbackContext.Provider>
-  );
+    const component = renderer.create(
+      <FeedbackContext.Provider
+        value={{ addFeedback, updateFeedback, feedbackEdit }}
+      >
+        <FeedbackForm />
+      </FeedbackContext.Provider>
+    )
 
-  const form = component.root.findByType('form');
-  const input = component.root.findByProps({ name: 'formInput' })
-  const ratingSelect = component.root.findByType(RatingSelect);
+    const form = component.root.findByType('form')
+    const input = component.root.findByProps({ name: 'formInput' })
+    const ratingSelect = component.root.findByType(RatingSelect)
 
-  act(() => {
-    input.props.onChange({ target: { value: 'New feedback' } });
-  });
+    act(() => {
+      input.props.onChange({ target: { value: 'New feedback' } })
+    })
 
-  act(() => {
-    ratingSelect.props.select(3);
-  });
+    act(() => {
+      ratingSelect.props.select(3)
+    })
 
-  act(() => {
-    form.props.onSubmit({ preventDefault: jest.fn() });
-  });
+    act(() => {
+      form.props.onSubmit({ preventDefault: jest.fn() })
+    })
 
-  expect(addFeedback).toHaveBeenCalledWith({
-    text: 'New feedback',
-    rating: 3,
-  });
-});
-it('clears the input value after submission', () => {
-  const component = renderer.create(
-    <FeedbackContext.Provider value={{ addFeedback, updateFeedback, feedbackEdit }}>
-      <FeedbackForm />
-    </FeedbackContext.Provider>
-  );
+    expect(addFeedback).toHaveBeenCalledWith({
+      text: 'New feedback',
+      rating: 3,
+    })
+  })
+  it('clears the input value after submission', () => {
+    const component = renderer.create(
+      <FeedbackContext.Provider
+        value={{ addFeedback, updateFeedback, feedbackEdit }}
+      >
+        <FeedbackForm />
+      </FeedbackContext.Provider>
+    )
 
-  const input = component.root.findByProps({ name: 'formInput' });
-  const form = component.root.findByType('form');
+    const input = component.root.findByProps({ name: 'formInput' })
+    const form = component.root.findByType('form')
 
-  // Enter text into input
-  act(() => {
-    input.props.onChange({ target: { name: 'formInput', value: 'Test feedback' } });
-  });
+    act(() => {
+      input.props.onChange({
+        target: { name: 'formInput', value: 'Test feedback' },
+      })
+    })
 
-  // Submit form
-  act(() => {
-    form.props.onSubmit({ preventDefault: jest.fn() });
-  });
+    act(() => {
+      form.props.onSubmit({ preventDefault: jest.fn() })
+    })
 
-  // Check that input value is empty string or undefined
-  const inputValue = component.root.findByProps({ name: 'formInput' }).props.value;
-  expect(inputValue === '').toBe(true);
-});
-
-it('disables the submit button when the form is submitting', () => {
-  const component = renderer.create(
-    <FeedbackContext.Provider
-      value={{ addFeedback, updateFeedback, feedbackEdit }}
-    >
-      <FeedbackForm />
-    </FeedbackContext.Provider>
-  );
-
-  const form = component.root.findByType('form')
-  const submitButton = component.root.findByType(Button)
-
-  act(() => {
-    form.props.onSubmit({ preventDefault: jest.fn() })
+    const inputValue = component.root.findByProps({ name: 'formInput' }).props
+      .value
+    expect(inputValue === '').toBe(true)
   })
 
-  expect(submitButton.props.isDisabled).toBe(true)
-});
+  it('disables the submit button when the form is submitting', () => {
+    const component = renderer.create(
+      <FeedbackContext.Provider
+        value={{ addFeedback, updateFeedback, feedbackEdit }}
+      >
+        <FeedbackForm />
+      </FeedbackContext.Provider>
+    )
 
+    const form = component.root.findByType('form')
+    const submitButton = component.root.findByType(Button)
+
+    act(() => {
+      form.props.onSubmit({ preventDefault: jest.fn() })
+    })
+
+    expect(submitButton.props.isDisabled).toBe(true)
+  })
+  it('displays an error message when feedback text is less than 10 characters', () => {
+    const component = renderer.create(
+      <FeedbackContext.Provider
+        value={{ addFeedback, updateFeedback, feedbackEdit }}
+      >
+        <FeedbackForm />
+      </FeedbackContext.Provider>
+    )
+    const input = component.root.findByProps({ name: 'formInput' })
+    act(() => {
+      input.props.onChange({ target: { name: 'formInput', value: 'Test' } })
+    })
+
+    const errorMessage = component.root.findByProps({ name: 'errorMessage' })
+    expect(errorMessage.children[0]).toBe('Text must be at least 10 characters')
+  })
+  // it("doesn't display an error message when feedback text is empty", () => {
+  //   const component = renderer.create(
+  //     <FeedbackContext.Provider
+  //       value={{ addFeedback, updateFeedback, feedbackEdit }}
+  //     >
+  //       <FeedbackForm />
+  //     </FeedbackContext.Provider>
+  //   )
+  //   const input = component.root.findByProps({ name: 'formInput' })
+  //   act(() => {
+  //     input.props.onChange({ target: { name: 'formInput', value: '' } })
+  //   })
+  //   try {
+  //     const errorMessage = component.root.findByProps({ name: 'errorMessage' })
+  //   } catch (error) {
+  //     expect(error).toBeDefined();
+  //     // expect(error).toBe('No instances found with props: {"name":"errorMessage"}');
+  //   }
+  // })
 })

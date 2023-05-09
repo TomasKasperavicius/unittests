@@ -11,7 +11,7 @@ function FeedbackList() {
   const { feedback, isLoading } = useContext(FeedbackContext)
 
   if (!isLoading && (!feedback || feedback.length === 0)) {
-    return <p>No Feedback Yet</p>
+    return <p name="empty-message">No Feedback Yet</p>
   }
 
   return isLoading ? (

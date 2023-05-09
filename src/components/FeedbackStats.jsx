@@ -11,8 +11,8 @@ function FeedbackStats() {
 
   return (
     <div className='feedback-stats'>
-      <h4>{feedback.length} Reviews</h4>
-      <h4>Average Rating: {average.toFixed(1).replace(/[.,]0$/, '')}</h4>
+      <h4 name="Review">{feedback.length} Reviews</h4>
+      <h4 name="Rating">Average Rating: {average.toFixed(1).replace(/[.,]0$/, '')}</h4>
     </div>
   )
 }

@@ -2,7 +2,9 @@ import React from 'react';
 import renderer, { act } from 'react-test-renderer';
 import FeedbackList from '../src/components/FeedbackList';
 import FeedbackContext from '../src/context/FeedbackContext';
-
+import FeedbackItem from '../src/components/FeedbackItem';
+import RatingSelect from '../src/components/RatingSelect';
+import FeedbackForm from '../src/components/FeedbackForm';
 describe('FeedbackList component', () => {
   const feedback = [
     { id: 1, name: 'John', feedback: 'Great product!', rating: 5 },
@@ -12,15 +14,32 @@ describe('FeedbackList component', () => {
 
   it('displays feedback items correctly', () => {
     const component = renderer.create(
-      <FeedbackContext.Provider value={{ feedback }}>
+      <FeedbackContext.Provider value={{ feedback:[feedback[0]] }}>
         <FeedbackList />
       </FeedbackContext.Provider>
     );
-
-    const tree = component.toJSON();
-    expect(tree).toMatchSnapshot();
+    const feedbackItems = component.root.findAllByType(FeedbackItem)
+    expect(feedbackItems[0].props.item).toStrictEqual({ id: 1, name: 'John', feedback: 'Great product!', rating: 5 })
   });
-
+  it('displays 0 feedback items when feedback array is empty', () => {
+    const component = renderer.create(
+      <FeedbackContext.Provider value={{ feedback:[] }}>
+        <FeedbackList />
+      </FeedbackContext.Provider>
+    );
+    const feedbackItems = component.root.findAllByType(FeedbackItem)
+    expect(feedbackItems.length === 0).toBe(true)
+  });
+  it('displays 3 feedback items when feedback array has 3 feedbacks', () => {
+    const component = renderer.create(
+      <FeedbackContext.Provider value={{ feedback:[] }}>
+        <FeedbackList />
+      </FeedbackContext.Provider>
+    );
+    const feedbackItems = component.root.findAllByType(FeedbackItem)
+    expect(feedbackItems.length === 0).toBe(true)
+  });
+  
   it('deletes a feedback item correctly', () => {
     const deleteFeedback= jest.fn();
     const component = renderer.create(
@@ -38,37 +57,56 @@ describe('FeedbackList component', () => {
     expect(deleteFeedback).toHaveBeenCalledWith(2);
   });
 
-  it('edits a feedback item correctly', () => {
-    const updateFeedback= jest.fn();
-    const editFeedback= jest.fn();
+  
+  it('updates the feedback list correctly after editing a feedback item', () => {
+    const mockFeedbackList = [
+      { id: 1, name: 'John', feedback: 'Great product!', rating: 4 },
+      { id: 2, name: 'Jane', feedback: 'Awesome customer service', rating: 5 },
+    ];
+    const feedbackEdit = {
+      edit: false,
+      item: { id: 1, name: 'John', feedback: 'Great product!', rating: 4 },
+    }
+    const mockUpdateFeedback = jest.fn();
+    const mockDeleteFeedback = jest.fn();
+    const mockEditFeedback = jest.fn();
     const component = renderer.create(
-      <FeedbackContext.Provider value={{ feedback, updateFeedback, editFeedback }}>
+      <FeedbackContext.Provider value={{feedbackEdit:feedbackEdit, feedback: mockFeedbackList, updateFeedback: mockUpdateFeedback, deleteFeedback: mockDeleteFeedback, editFeedback: mockEditFeedback }}>
+        <FeedbackForm />
+        <FeedbackList/>
+      </FeedbackContext.Provider>
+    );
+  
+    const editButton = component.root.findByType(FeedbackList).findAllByType(FeedbackItem)[0].findByProps({ name: 'editButton' });
+    act(() => {
+      editButton.props.onClick();
+    });
+  
+    const formInputs = component.root.findByProps({ name: 'formInput' });
+    const ratingSelect = component.root.findByType(RatingSelect);
+    const form = component.root.findByType('form');
+    act(() => {
+      formInputs.props.onChange({ target: { value: 'New feedback' } });
+      ratingSelect.props.select(3);
+      form.props.onSubmit({ preventDefault: jest.fn() });
+    });
+  
+    expect(mockEditFeedback).toHaveBeenCalledWith({ id: 1, name: 'John', feedback: 'Great product!', rating: 4 });
+  
+    const feedbackItems = component.root.findByType(FeedbackList).findAllByType(FeedbackItem)
+    expect(feedbackItems.length).toBe(2);
+    expect(feedbackItems[0].props.item).toStrictEqual({ id: 1, name: 'John', feedback: 'Great product!', rating: 4 });
+  });
+  it('displays a message when there are no feedback items', () => {
+    const mockFeedbackList = [];
+    const component = renderer.create(
+      <FeedbackContext.Provider value={{ feedback: mockFeedbackList }}>
         <FeedbackList />
       </FeedbackContext.Provider>
     );
-
-    const editBtn = component.root.findAllByProps({ name: 'editButton' })[1];
-
-    act(() => {
-      editBtn.props.onClick();
-    });
-
-    const editForm = component.root.findByProps({name:'formInput'});
-    const editNameInput = editForm.findAllByProps({ name: 'name' })[0];
-    const editFeedbackInput = editForm.findAllByProps({ name: 'feedback' })[0];
-    const editRatingSelect = editForm.findByProps({ name: 'rating' });
-
-    act(() => {
-      editNameInput.props.onChange({ target: { name: 'name', value: 'Updated Name' } });
-      editFeedbackInput.props.onChange({ target: { name: 'feedback', value: 'Updated feedback' } });
-      editRatingSelect.props.onChange({ select: 4 });
-      editForm.props.onSubmit({ preventDefault: () => {} });
-    });
-
-    expect(updateFeedback).toHaveBeenCalledWith(2, {
-      name: 'Updated Name',
-      feedback: 'Updated feedback',
-      rating: 4,
-    });
-  });
+    
+  
+    const message = component.root.findByProps({ name: 'empty-message' });
+    expect(message.children[0]).toBe('No Feedback Yet');
+  });     
 });

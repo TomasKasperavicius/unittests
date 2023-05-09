@@ -80,7 +80,7 @@ function FeedbackForm() {
           </Button>
         </div>
 
-        {message && <div className='message'>{message}</div>}
+        {message && <div className='message' name="errorMessage">{message}</div>}
       </form>
     </Card>
   )
