@@ -10,8 +10,8 @@ describe('FeedbackStats component', () => {
         <FeedbackStats />
       </FeedbackContext.Provider>
     );
-
-    expect(tree.children[0].children.join('')).toContain('0 Reviews');
+    const review = component.root.findByProps({name:"Review"})
+    expect(review.children.join("")).toContain('0 Reviews');
   });
   it('displays 3 as the number of reviews when there are three feedbacks', () => {
     const feedback = [
@@ -24,8 +24,8 @@ describe('FeedbackStats component', () => {
         <FeedbackStats />
       </FeedbackContext.Provider>
     );
-
-    expect(tree.children[0].children.join('')).toContain('3 Reviews');
+    const review = component.root.findByProps({name:"Review"})
+    expect(review.children.join("")).toContain('3 Reviews');
   });
   it('displays correct average rating when it is decimal', () => {
     const feedback = [
@@ -40,8 +40,8 @@ describe('FeedbackStats component', () => {
         <FeedbackStats />
       </FeedbackContext.Provider>
     );
-
-    expect(tree.children[1].children.join('')).toContain('Average Rating: 3.5');
+    const rating = component.root.findByProps({name:"Rating"})
+    expect(rating.children.join('')).toContain('Average Rating: 3.5');
   });
 
   it('displays correct average rating when it is a whole number', () => {
@@ -56,8 +56,9 @@ describe('FeedbackStats component', () => {
         <FeedbackStats />
       </FeedbackContext.Provider>
     );
+    const rating = component.root.findByProps({name:"Rating"})
 
-    expect(tree.children[1].children.join('')).toContain('Average Rating: 3');
+    expect(rating.children.join('')).toContain('Average Rating: 3');
   });
 
   it('displays the correct number of reviews and average when there is only one feedback', () => {
@@ -86,8 +87,9 @@ describe('FeedbackStats component', () => {
         <FeedbackStats />
       </FeedbackContext.Provider>
     );
-
-    expect(tree.children[0].children.join('')).toContain('3 Reviews');
-    expect(tree.children[1].children.join('')).toContain('Average Rating: 3');
+    const review = component.root.findByProps({name:"Review"})
+    const rating = component.root.findByProps({name:"Rating"})
+    expect(review.children.join('')).toContain('3 Reviews');
+    expect(rating.children.join('')).toContain('Average Rating: 3');
   });
 });

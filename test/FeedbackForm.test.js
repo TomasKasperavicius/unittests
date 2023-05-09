@@ -63,7 +63,7 @@ describe('FeedbackForm', () => {
     expect(button.props.isDisabled).toBe(true)
   })
 
-  it('calls addFeedback when submitting a new feedback', () => {
+  it('calls addFeedback function when submitting a new feedback', () => {
     const component = renderer.create(
       <FeedbackContext.Provider
         value={{ addFeedback, updateFeedback, feedbackEdit }}
@@ -194,23 +194,4 @@ describe('FeedbackForm', () => {
     const errorMessage = component.root.findByProps({ name: 'errorMessage' })
     expect(errorMessage.children[0]).toBe('Text must be at least 10 characters')
   })
-  // it("doesn't display an error message when feedback text is empty", () => {
-  //   const component = renderer.create(
-  //     <FeedbackContext.Provider
-  //       value={{ addFeedback, updateFeedback, feedbackEdit }}
-  //     >
-  //       <FeedbackForm />
-  //     </FeedbackContext.Provider>
-  //   )
-  //   const input = component.root.findByProps({ name: 'formInput' })
-  //   act(() => {
-  //     input.props.onChange({ target: { name: 'formInput', value: '' } })
-  //   })
-  //   try {
-  //     const errorMessage = component.root.findByProps({ name: 'errorMessage' })
-  //   } catch (error) {
-  //     expect(error).toBeDefined();
-  //     // expect(error).toBe('No instances found with props: {"name":"errorMessage"}');
-  //   }
-  // })
 })
